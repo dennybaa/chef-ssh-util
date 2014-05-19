@@ -5,45 +5,45 @@ module SSHUtil
 
     # Dynamically create a single copy of the configuration template
     def ssh_template_resource
-      opts = ssh_prepare_opts
-      @run_context.resource_collection.lookup("template[#{opts[:config_path]}]")
+      tpl_name = params[:user] ? "ssh_config for #{params[:user]}" : "ssh_config system-wide"
+      @run_context.resource_collection.lookup("template[#{tpl_name}")
     rescue Chef::Exceptions::ResourceNotFound
-      directory ::File.dirname(opts[:config_path]) do
-        owner opts[:owner]
-        group opts[:gid]
-        mode  opts[:config_global] ? 00755 : 00700
+      directory "ssh_config parent directory for #{tpl_name}" do
+        path  lazy {
+          if params[:user]
+            ::File.expand_path("~#{params[:user]}/.ssh")
+          else
+            ::File.dirname(node['ssh-util']['ssh_config'])
+          end
+        }
+        owner params[:owner]
+        group lazy {SSHUtil::Config.passwd_ent(params[:owner]).gid}
+        mode  params[:user] ? 00700 : 00755
         recursive true
         action :create
       end
-      template opts[:config_path] do
-        owner opts[:owner]
-        group opts[:gid]
-        mode  opts[:config_global] ? 00644 : 00600
+      template tpl_name do
+        path  lazy {
+          if params[:user]
+            ::File.expand_path("~#{params[:user]}/.ssh/config")
+          else
+            node['ssh-util']['ssh_config']
+          end
+        }
+        owner params[:owner]
+        group lazy {SSHUtil::Config.passwd_ent(params[:owner]).gid}
+        mode  params[:user] ? 00600 : 00644
         source   node['ssh-util']['config_template']
         cookbook node['ssh-util']['config_cookbook']
         variables lazy {
-          base = (opts[:config_global] ? node['ssh-util']['ssh_config'] :
-            node['ssh-util']['user_ssh_config'][opts[:user]])
+          base = (params[:user] ? node['ssh-util']['user_ssh_config'][params[:user]] :
+            node['ssh-util']['ssh_config'])
           {options: base[:options], hosts: base[:hosts]}
         }
       end
     end
 
-    # Prepare ssh config opts hash
-    def ssh_prepare_opts
-      @ssh_config_opts ||= begin
-        m = Mash.new
-        m[:user]   = params[:name]
-        m[:owner]  = m[:user] || 'root'
-        m[:gid]    = passwd_entry_for(m[:owner]).gid
-        m[:config_global] = m[:user].to_s.empty? ? true : false
-        m[:config_path]   = m[:config_global] ? node['ssh-util']['ssh_config_path'] :
-            ::File.join(::File.expand_path("~#{m[:user]}"), '.ssh', 'config')
-        m
-      end
-    end
-
-    def passwd_entry_for(uid)
+    def self.passwd_ent(uid)
       uid.is_a?(Fixnum) ? Etc.getpwuid(uid) : Etc.getpwnam(uid)
     end
 

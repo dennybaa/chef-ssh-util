@@ -1,14 +1,16 @@
 
 define :ssh_config, :action => :append do
+  params[:user]  = params[:name]
+  params[:owner] = params[:user] || 'root'
+
   if (params[:hosts].nil? || params[:hosts].empty?) && (params[:options].nil? || params[:options].empty?)
     Chef::Log.warn "ssh_config[#{params[:name]}] empty configuration, no action will be taken"
   else
     self.singleton_class.send(:include, SSHUtil::Config)
-    opts = ssh_prepare_opts # prepare default options
     ssh_template_resource # create a single copy of the config template
 
-    base = (opts[:config_global] ? node.default['ssh-util']['ssh_config'] :
-      node.default['ssh-util']['user_ssh_config'][opts[:user]])
+    base = (params[:user] ? node.default['ssh-util']['user_ssh_config'][params[:user]] :
+      node.default['ssh-util']['ssh_config'])
 
     if params[:action] == :append
       [:options, :hosts].each do |p|
