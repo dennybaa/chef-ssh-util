@@ -8,7 +8,7 @@ module SSHUtil
       tpl_name = params[:user] ? "ssh_config for #{params[:user]}" : "ssh_config system-wide"
       @run_context.resource_collection.lookup("template[#{tpl_name}")
     rescue Chef::Exceptions::ResourceNotFound
-      directory "ssh_config parent directory for #{tpl_name}" do
+      directory "parent directory of #{tpl_name}" do
         path  lazy {
           if params[:user]
             ::File.expand_path("~#{params[:user]}/.ssh")
