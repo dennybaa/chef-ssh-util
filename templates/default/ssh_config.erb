@@ -6,6 +6,7 @@ Host <%= h %>
     <%= k.to_s.split('_').map {|w| w.capitalize}.join %> <%= v %>
 <% end -%> 
 <% end -%>
+
 <% (@options || []).each do |k,v| -%>
 <%= k.to_s.split('_').map {|w| w.capitalize}.join %> <%= v %>
 <% end -%>
