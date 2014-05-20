@@ -17,7 +17,7 @@ module SSHUtil
           end
         }
         owner params[:owner]
-        group lazy {SSHUtil::Config.passwd_ent(params[:owner]).gid}
+        group lazy {Etc.getpwnam(params[:owner]).gid}
         mode  params[:user] ? 00700 : 00755
         recursive true
         action :create
@@ -31,7 +31,7 @@ module SSHUtil
           end
         }
         owner params[:owner]
-        group lazy {SSHUtil::Config.passwd_ent(params[:owner]).gid}
+        group lazy {Etc.getpwnam(params[:owner]).gid}
         mode  params[:user] ? 00600 : 00644
         source   node['ssh-util']['config_template']
         cookbook node['ssh-util']['config_cookbook']
@@ -41,10 +41,6 @@ module SSHUtil
           {options: base[:options], hosts: base[:hosts]}
         }
       end
-    end
-
-    def self.passwd_ent(uid)
-      uid.is_a?(Fixnum) ? Etc.getpwuid(uid) : Etc.getpwnam(uid)
     end
 
   end
