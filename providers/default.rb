@@ -46,6 +46,17 @@ def authorized_keys
 end
 
 def ssh_config
+  options = (node['ssh-util']['ssh_config'] || {}).to_hash
+  global = options.delete('*')
+  template node['ssh-util']['ssh_config_path'] do
+    owner 'root'
+    group 'root'
+    mode  0644
+    source 'ssh_config.erb'
+    variables(options: global, hosts: options)
+    not_if {global.empty? && options.empty?}
+  end
+
   (node['ssh-util']['ssh_config_user'] || {}).each do |un, opts|
     pwent = Etc.getpwnam(un)
     options = opts.to_hash
