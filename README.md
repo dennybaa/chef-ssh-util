@@ -1,7 +1,10 @@
 # ssh-util cookbook
 
-**ssh-util** cookbook provides various tools to manage openssh based systems.
-The cookbook currently includes only **ssh_config** definition to manage system-wide and user-specific ssh_config files.
+**ssh-util** cookbook provides ssh-util resource which helps to manage:
+
+ * Users ssh home directories (*~/.ssh*), namely creates them and sets permissions.
+ * Users authorized_keys files.
+ * Users and system-wide ssh_config files.
 
 ## Supported Platforms
 
@@ -11,56 +14,66 @@ Supposed to run on all  debian flavors.
 
 ### Attributes
 
- * **node['ssh-util']['ssh_config']** system-wide ssh_config configuration which is a hash containing options and hosts keys which are also respectively hashes.
- * **node['ssh-util']['user_ssh_config'][UserName]** user-specific ssh_config configuration which is a hash containing options and hosts keys which are also respectively hashes.
+ * **node['ssh-util']['ssh_config']** system-wide ssh_config configuration hash.
+ * **node['ssh-util']['ssh_config_user'][UserName]** user-specific ssh_config configuration hash.
+ * **node['ssh-util']['authorized_keys'][UserName]** user's authorized keys array
 
-**ssh_config** and **user_ssh_config** attributes are managed on the cookbook default precedence level by **ssh_config** definition. So if you might as well want to add your customizations it's suggested to use role or environment precedence levels.
+All the above attributes can be managed through roles, environments and directly. However for more handy usage this cookbook provides definition helpers **ssh_authorized_keys** and **ssh_config**.
 
-### ssh_config definition
+### Definitions
 
-Provides the way to manage user and system-wide ssh_config files (*~/.ssh/config*, */etc/ssh/ssh_config* respectively). Typical invocation examples are provided bellow:
+All definitions operate on *recipe default attribute level* and they are supposed to be invoked multiple times from different cookbooks and recipes. The main job only to setup attributes in predictable manner, all the job itself is carried by the **ssh-util** resource provider.
 
-    ssh_config 'vagrant' do
-      options(
-        strict_host_key_checking: 'no',
-        user_known_hosts_file: '/dev/null'
-      )
-      hosts(
-        'github.com' => {
-          user: 'git',
-          identity_file: '/var/apps/github_deploy_key'
-        }
-      )
+#### ssh_authorized_keys
+
+The definition supports two actions **:append** and **:remove**. Usage example:
+
+    ssh_authorized_keys do
+        action :append
+        user 'root'
+        keys 'ssh-rsa SomeLongKey1'
     end
 
-    ssh_config 'vagrant' do
-      options 'user_known_hosts_file', 'strict_host_key_checking'
-      hosts(
-        'github.com',
-        'anotherhost.net'
-      )
-      action :remove
+    ssh_authorized_keys do
+        action :append
+        user 'root'
+        keys 'ssh-rsa SomeLongKey2'
     end
 
-Arguments:
- * **options** is a hash or an array of options to be added or removed from the configuration file. Use hash or array for `:append`, `:remove` actions respectively.
- * **hosts** is a hash of host specific options to be added to or an array of hosts to be removed from the configuration file. Use hash or array for `:append`, `:remove` actions respectively.
- * **action** can be `:append` or `:remove`. Default is `:append`.
- * **name** - the definition name corresponds to the user which configuration file is processed. If nothing is given the system-wide configuration file is processed.
+    ssh_authorized_keys do
+        action :remove
+        user 'root'
+        keys 'ssh-rsa SomeLongKey1'
+    end
+    
+The above code works in the predictable manner and after the chefrun completes you will find only the *SomeLongKey2* in the root's authorized_keys file.
 
-**ssh_config** is a definition and it's implemented to create only a single configuration file. However it can be invoked many times from different cookbooks, the attributes will be properly merged or cleaned and the single copy of template will be altered.
+#### ssh_config
 
-### ssh-util::default
+Supports only **:append** action. It can be used to create and populate *~/.ssh/config* and */etc/ssh/ssh_config* configuration files. Usage example
 
-Include `ssh-util` in your node's `run_list`:
+Provides the way to setup user and system-wide ssh_config attributes. Usage example:
 
-```json
-{
-  "run_list": [
-    "recipe[ssh-util::default]"
-  ]
-}
-```
+    ssh_config do
+        user 'vagrant'
+        options({
+            '*' => {
+                strict_host_key_checking: 'no',
+                user_known_hosts_file: '/dev/null'
+            },
+            'github.com' => {
+                user: 'git',
+                identity_file: '/var/apps/github_deploy_key'
+            }
+        })
+    end
+    
+Special host ***** sets the global options which go first in the configuration file.
+
+
+## Resource configuration
+
+To completely disable one of the following features *manage_ssh_home*, *authorized_keys*, *ssh_config* you might wnat to override node['ssh-util']['default_supports'] attribute.
 
 ## Contributing
 
