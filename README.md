@@ -50,9 +50,7 @@ The above code works in the predictable manner and after the chefrun completes y
 
 #### ssh_config
 
-Supports only **:append** action. It can be used to create and populate *~/.ssh/config* and */etc/ssh/ssh_config* configuration files. Usage example
-
-Provides the way to setup user and system-wide ssh_config attributes. Usage example:
+Supports only **:append** action. It can be used to create and populate *~/.ssh/config* and */etc/ssh/ssh_config* configuration files. Provides the way to setup user and system-wide ssh_config attributes. Usage example:
 
     ssh_config do
         user 'vagrant'
@@ -68,7 +66,7 @@ Provides the way to setup user and system-wide ssh_config attributes. Usage exam
         })
     end
     
-Special host ***** sets the global options which go first in the configuration file.
+Special host __*__ sets the global options which go first in the configuration file.
 
 
 ## Resource configuration
