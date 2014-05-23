@@ -28,7 +28,7 @@ def manage_ssh_home
       group lazy {Etc.getpwnam(un).gid}
       owner un
       mode  00700
-      if wait_for_user?
+      if wait_for_user?(un)
         action :nothing
         subscribes :create, "user[#{un}]", :delayed
       end
@@ -45,7 +45,7 @@ def authorized_keys
       mode  0644
       source 'authorized_keys.erb'
       variables(keys: keys)
-      if wait_for_user?
+      if wait_for_user?(un)
         action :nothing
         subscribes :create, "user[#{un}]", :delayed
       end
@@ -75,7 +75,7 @@ def ssh_config
       mode  0600
       source 'ssh_config.erb'
       variables(options: global, hosts: options)
-      if wait_for_user?
+      if wait_for_user?(un)
         action :nothing
         subscribes :create, "user[#{un}]", :delayed
       end
