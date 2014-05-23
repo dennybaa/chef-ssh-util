@@ -13,6 +13,8 @@ when 'debian'
       gss_api_delegate_credentials: 'no'
     }
   }
+else
+  default['ssh-util']['ssh_config'] = {'*' => {}}
 end
 
 default['ssh-util']['default_supports'] = {
