@@ -1,5 +1,6 @@
 
-define :ssh_config, :action => :append do
+define :ssh_config do
+  params[:action] or params[:action] = :append
   username = params[:user]
   options = Mash.new(params[:options])
 

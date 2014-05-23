@@ -1,5 +1,6 @@
 
-define :ssh_authorized_keys, :action => :append do
+define :ssh_authorized_keys do
+  params[:action] or params[:action] = :append
   username = params[:user]
   username or raise ArgumentError, "ssh_authorized_keys expects username"
   newkeys  = Array(params[:keys])
