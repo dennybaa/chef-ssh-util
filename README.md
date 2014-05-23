@@ -12,6 +12,9 @@ Supposed to run on all  debian flavors.
 
 ## Usage
 
+Important issue in **ssh-util** provider work is that that it allows you to create users separately in the later cookbooks' recipes. In this case
+it will try to subscribe to **'user[#{username}]'** resources. So execution might fail fail if the missing user is not created by the user resource in the given notation.
+
 ### Attributes
 
  * **node['ssh-util']['ssh_config']** system-wide ssh_config configuration hash.
