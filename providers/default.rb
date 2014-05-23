@@ -24,7 +24,7 @@ def manage_ssh_home
   users |= (node['ssh-util']['ssh_config_user'] || {}).keys
   users.each do |un|
     directory "~#{un}/.ssh" do
-      path  lazy {File.expand_path("~#{un}/.ssh")}
+      path  lazy {::File.expand_path("~#{un}/.ssh")}
       group lazy {Etc.getpwnam(un).gid}
       owner un
       mode  00700
@@ -39,7 +39,7 @@ end
 def authorized_keys
   uniq_authkeys.each_pair do |un, keys|
     template "~#{un}/.ssh/authorized_keys" do
-      path  lazy {File.expand_path("~#{un}/.ssh/authorized_keys")}
+      path  lazy {::File.expand_path("~#{un}/.ssh/authorized_keys")}
       group lazy {Etc.getpwnam(un).gid}
       owner un
       mode  0644
@@ -69,7 +69,7 @@ def ssh_config
     options = opts.to_hash
     global = options.delete('*') || {}
     template "~#{un}/.ssh/config" do
-      path  lazy {File.expand_path("~#{un}/.ssh/authorized_keys")}
+      path  lazy {::File.expand_path("~#{un}/.ssh/authorized_keys")}
       group lazy {Etc.getpwnam(un).gid}
       owner un
       mode  0600
