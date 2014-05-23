@@ -20,3 +20,6 @@ default['ssh-util']['default_supports'] = {
   authorized_keys: true,
   ssh_config: true
 }
+
+default['ssh-util']['authorized_keys'] = {}
+default['ssh-util']['ssh_config_user'] = {}

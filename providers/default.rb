@@ -23,24 +23,32 @@ def manage_ssh_home
   users = uniq_authkeys.keys
   users |= (node['ssh-util']['ssh_config_user'] || {}).keys
   users.each do |un|
-    pwent = Etc.getpwnam(un)
-    directory "#{pwent.dir}/.ssh" do
+    directory "~#{un}/.ssh" do
+      path  lazy {File.expand_path("~#{un}/.ssh")}
+      group lazy {Etc.getpwnam(un).gid}
       owner un
-      group pwent.gid
       mode  00700
+      if wait_for_user?
+        action :nothing
+        subscribes :create, "user[#{un}]", :delayed
+      end
     end
   end
 end
 
 def authorized_keys
   uniq_authkeys.each_pair do |un, keys|
-    pwent = Etc.getpwnam(un)
-    template "#{pwent.dir}/.ssh/authorized_keys" do
+    template "~#{un}/.ssh/authorized_keys" do
+      path  lazy {File.expand_path("~#{un}/.ssh/authorized_keys")}
+      group lazy {Etc.getpwnam(un).gid}
       owner un
-      group pwent.gid
       mode  0644
       source 'authorized_keys.erb'
       variables(keys: keys)
+      if wait_for_user?
+        action :nothing
+        subscribes :create, "user[#{un}]", :delayed
+      end
     end
   end
 end
@@ -58,15 +66,19 @@ def ssh_config
   end
 
   (node['ssh-util']['ssh_config_user'] || {}).each do |un, opts|
-    pwent = Etc.getpwnam(un)
     options = opts.to_hash
-    global = options.delete('*')
-    template "#{pwent.dir}/.ssh/config" do
+    global = options.delete('*') || {}
+    template "~#{un}/.ssh/config" do
+      path  lazy {File.expand_path("~#{un}/.ssh/authorized_keys")}
+      group lazy {Etc.getpwnam(un).gid}
       owner un
-      group pwent.gid
       mode  0600
       source 'ssh_config.erb'
       variables(options: global, hosts: options)
+      if wait_for_user?
+        action :nothing
+        subscribes :create, "user[#{un}]", :delayed
+      end
     end
   end
 end
@@ -84,6 +96,15 @@ def uniq_authkeys
       end
       memo
     end
+  end
+end
+
+# We make execution of our resources delayed in case the user doesn't exist.
+# Because it might be created later in other cookbooks.
+def wait_for_user?(username)
+  @wait_for_user ||= begin
+    ent = Etc.getpwnam(username) rescue nil
+    ent.nil? ? true : false
   end
 end
 
