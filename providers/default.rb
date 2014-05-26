@@ -69,7 +69,7 @@ def ssh_config
     options = opts.to_hash
     global = options.delete('*') || {}
     template "~#{un}/.ssh/config" do
-      path  lazy {::File.expand_path("~#{un}/.ssh/authorized_keys")}
+      path  lazy {::File.expand_path("~#{un}/.ssh/config")}
       group lazy {Etc.getpwnam(un).gid}
       owner un
       mode  0600
