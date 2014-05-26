@@ -7,7 +7,7 @@ def whyrun_supported?
 end
 
 action :run do
-  @supported_order.each {|meth| self.send(meth) if new_resource.supports[meth]}
+  @supported_order.each {|meth| self.send(meth) if supports?(meth)}
 end
 
 def initialize(new_resource, run_context)
@@ -106,6 +106,10 @@ def wait_for_user?(username)
     ent = Etc.getpwnam(username) rescue nil
     ent.nil? ? true : false
   end
+end
+
+def supports?(key)
+  node['ssh-util']['default_supports'][key] == true
 end
 
 def public_key_from(str)
