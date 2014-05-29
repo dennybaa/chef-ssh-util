@@ -4,20 +4,18 @@
 
  * Users ssh home directories (*~/.ssh*), namely creates them and sets permissions.
  * Users authorized_keys files.
- * Users and system-wide ssh_config files.
+ * Users ssh_config files.
 
 ## Supported Platforms
 
-Supposed to run on all  debian flavors.
+Supposed to run any platform.
 
 ## Usage
 
-Important issue in **ssh-util** provider work is that that it allows you to create users separately in the later cookbooks' recipes. In this case
-it will try to subscribe to **'user[#{username}]'** resources. So execution might fail fail if the missing user is not created by the user resource in the given notation.
+_**Important idea**_ is that that **ssh-util** provider operation allows you to create users separately from this cookbook. This basically means that you can invoke **'user[#{username}]'** in any of your cookbooks' recipes. The **ssh-util** provider will try to subscribe with the *delayed* execution for a user resource. Mind that operation might fail in case you create a user using the different resource name.
 
 ### Attributes
 
- * **node['ssh-util']['ssh_config']** system-wide ssh_config configuration hash.
  * **node['ssh-util']['ssh_config_user'][UserName]** user-specific ssh_config configuration hash.
  * **node['ssh-util']['authorized_keys'][UserName]** user's authorized keys array
 
@@ -53,7 +51,7 @@ The above code works in the predictable manner and after the chefrun completes y
 
 #### ssh_config
 
-Supports only **:append** action. It can be used to create and populate *~/.ssh/config* and */etc/ssh/ssh_config* configuration files. Provides the way to setup user and system-wide ssh_config attributes. Usage example:
+Supports only **:append** action. Provides a way to populate *ssh_config_user* attributes which effect on user *~/.ssh/config* configuration files generation. Usage example:
 
     ssh_config do
         user 'vagrant'
