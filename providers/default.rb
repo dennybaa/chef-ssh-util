@@ -15,7 +15,7 @@ def initialize(new_resource, run_context)
   @supported_order = [
     :manage_ssh_home,
     :authorized_keys,
-    :ssh_config
+    :ssh_config_user,
   ]
 end
 
@@ -53,18 +53,7 @@ def authorized_keys
   end
 end
 
-def ssh_config
-  options = (node['ssh-util']['ssh_config'] || {}).to_hash
-  global = options.delete('*')
-  template node['ssh-util']['ssh_config_path'] do
-    owner 'root'
-    group 'root'
-    mode  0644
-    source 'ssh_config.erb'
-    variables(options: global, hosts: options)
-    not_if {global.empty? && options.empty?}
-  end
-
+def ssh_config_user
   (node['ssh-util']['ssh_config_user'] || {}).each do |un, opts|
     options = opts.to_hash
     global = options.delete('*') || {}

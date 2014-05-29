@@ -2,25 +2,19 @@ default['ssh-util']['ssh_config_path'] = '/etc/ssh/ssh_config'
 default['ssh-util']['ssh_config_template'] = 'ssh_config.erb'
 default['ssh-util']['ssh_config_cookbook'] = 'ssh-util'
 
-# platform defaults for system-wide settings
-case node['platform_family']
-when 'debian'
-  default['ssh-util']['ssh_config'] = {
-    '*' => {
-      send_env: 'LANG LC_*',
-      hash_known_hosts: 'yes',
-      gss_api_authentication: 'yes',
-      gss_api_delegate_credentials: 'no'
-    }
-  }
-else
-  default['ssh-util']['ssh_config'] = {'*' => {}}
-end
+# All platform defaults of system-wide settings which are
+# passed to openssh if it's included.
+default['ssh-util']['ssh_config'] = {
+  send_env: 'LANG LC_*',
+  hash_known_hosts: 'yes',
+  gssapi_authentication: 'yes',
+  gssapi_delegate_credentials: 'no'
+}
 
 default['ssh-util']['default_supports'] = {
   manage_ssh_home: true,
   authorized_keys: true,
-  ssh_config: true
+  ssh_config_user: true
 }
 
 default['ssh-util']['authorized_keys'] = {}

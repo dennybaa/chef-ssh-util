@@ -15,4 +15,8 @@
 # GNU General Public License for more details.
 #
 
-ssh_util 'openssh client settings'
+node['ssh-util']['ssh_config'].each do |o, v|
+  node.default['openssh']['client'][o] = v
+end
+
+ssh_util 'openssh ssh-util helper'

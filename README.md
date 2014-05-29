@@ -74,7 +74,7 @@ Special host __*__ sets the global options which go first in the configuration f
 
 ## Resource configuration
 
-To completely disable one of the following features *manage_ssh_home*, *authorized_keys*, *ssh_config* you might wnat to override node['ssh-util']['default_supports'] attribute.
+To completely disable one of the following features *manage_ssh_home*, *authorized_keys*, *ssh_config_user* you might wnat to override node['ssh-util']['default_supports'] attribute.
 
 ## Contributing
 
