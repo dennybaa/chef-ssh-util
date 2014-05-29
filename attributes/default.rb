@@ -1,4 +1,3 @@
-default['ssh-util']['ssh_config_path'] = '/etc/ssh/ssh_config'
 default['ssh-util']['ssh_config_template'] = 'ssh_config.erb'
 default['ssh-util']['ssh_config_cookbook'] = 'ssh-util'
 
