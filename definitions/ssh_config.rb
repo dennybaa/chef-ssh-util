@@ -8,7 +8,7 @@ define :ssh_config do
     # we do deep merge of the default level cookbook attributes
     result = Chef::Mixin::DeepMerge.deep_merge(base[username], options)
     base[username] = result
-  elsif 
+  elsif params[:action] != :append
     raise ArgumentError, "ssh_config action :#{params[:action]} is not supported"
   end
 end
